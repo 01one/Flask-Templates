@@ -9,9 +9,9 @@ app = Flask(__name__)
 def form_example():
     return render_template('form-example.html')
 
-# Function to validate user input from the form
+
 def validate_input(address, phone, email):
-    errors = {}  # Dictionary to store error messages
+    errors = {}
     
     # Address validation: It should be between 5 to 200 characters
     # Also, it should NOT contain links like 'http://', 'www.', etc.
@@ -34,10 +34,9 @@ def validate_input(address, phone, email):
     
     return errors
 
-# This is the route where the form data will be submitted
+
 @app.route('/submit-form', methods=['POST'])
 def submit_form():
-    # Get JSON data sent from the client-side
     data = request.json
     
     # Extract values from the request, remove any unwanted spaces
@@ -48,7 +47,6 @@ def submit_form():
     # Validate the extracted input data
     errors = validate_input(address, phone, email)
     
-    # If there are validation errors, return them as a response
     if errors:
         return jsonify({"success": False, "errors": errors}), 400
     
