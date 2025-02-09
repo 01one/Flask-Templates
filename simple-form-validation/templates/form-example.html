@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Form</title>
+    <style>
+        .error {
+            color: red;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<div>
+    <h3>Submit Your Details</h3>
+    <form id="form">
+        <input type="text" id="address" placeholder="Address" required>
+        <div id="addressError" class="error"></div>
+        
+        <input type="text" id="phone" placeholder="Phone Number" required>
+        <div id="phoneError" class="error"></div>
+        
+        <input type="email" id="email" placeholder="Email (optional)">
+        <div id="emailError" class="error"></div>
+        
+        <button type="submit">Submit</button>
+    </form>
+    <div id="message"></div>
+</div>
+
+<script>
+    // When the user submits the form, it prevents the default behavior.
+    // It gets values from the input fields, trims whitespace, and validates them.
+    // The address field is checked for length and whether it contains links.
+    // The phone field is validated to ensure it contains only numbers and an optional '+' sign.
+    // The email field is optional but must follow a valid email format if provided.
+    // If validation fails, it displays error messages and prevents submission.
+    // If everything is valid, it sends the data to a backend API endpoint using fetch.
+    // The API response is displayed as a message, and errors are logged in the console.
+    document.getElementById('form').addEventListener('submit', function (e) {
+        e.preventDefault();
+        
+        const address = document.getElementById('address').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        const email = document.getElementById('email').value.trim();
+
+        let valid = true;
+        
+        // Reset error messages
+        document.getElementById('addressError').textContent = "";
+        document.getElementById('phoneError').textContent = "";
+        document.getElementById('emailError').textContent = "";
+        
+        // Address validation: length & no links
+        const linkPattern = /(http[s]?:\/\/|www\.)\S+/;
+        if (address.length < 5 || address.length > 200 || linkPattern.test(address)) {
+            document.getElementById('addressError').textContent = "Address must be 5-200 characters and not contain links.";
+            valid = false;
+        }
+
+        // Phone validation (only numbers, 9-15 digits, optional '+')
+        const phoneRegex = /^\+?[0-9]{9,15}$/;
+        if (!phoneRegex.test(phone)) {
+            document.getElementById('phoneError').textContent = "Invalid phone number.";
+            valid = false;
+        }
+
+        // Email validation (optional but must be in correct format)
+        if (email && !/^\S+@\S+\.\S+$/.test(email)) {
+            document.getElementById('emailError').textContent = "Invalid email format.";
+            valid = false;
+        }
+
+        if (!valid) return;
+
+        fetch('/submit-form', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ address, phone, email })
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('message').textContent = data.message;
+        })
+        .catch(error => console.error('Error:', error));
+    });
+</script>
+
+</body>
+</html>
