@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if query %}Search Results for "{{ query }}"{% else %}Search{% endif %}{% endblock %}
+
+{% block content %}
+    <section class="search">
+        <h2>{% if query %}Search Results for "{{ query }}"{% else %}Search Posts{% endif %}</h2>
+        
+        <form action="{{ url_for('search') }}" method="get" class="search-form">
+            <input type="text" name="q" value="{{ query }}" placeholder="Enter search terms...">
+            <button type="submit">Search</button>
+        </form>
+
+        {% if query %}
+            <div class="url-explanation">
+                <h3>URL Breakdown</h3>
+                <p>Current URL: <code>{{ request.path }}?q={{ query }}</code></p>
+                <p>The query parameter <code>q</code> is: <code>{{ query }}</code></p>
+                <p>Unlike dynamic URL segments, query parameters are accessed with <code>request.args.get('q')</code></p>
+            </div>
+
+            {% if results %}
+                <div class="search-results">
+                    <h3>{{ results|length }} Result{% if results|length != 1 %}s{% endif %} Found</h3>
+                    {% for id, post in results %}
+                        <div class="result-item">
+                            <h4><a href="{{ url_for('show_post', post_id=id) }}">{{ post.title }}</a></h4>
+                            <p class="post-meta">By <a href="{{ url_for('profile', username=post.author) }}">{{ users[post.author].name }}</a> on {{ post.date }}</p>
+                            <p class="post-excerpt">{{ post.content[:150] }}...</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>No results found for "{{ query }}".</p>
+            {% endif %}
+        {% else %}
+            <p>Enter a search term above to find posts.</p>
+        {% endif %}
+    </section>
+{% endblock %}

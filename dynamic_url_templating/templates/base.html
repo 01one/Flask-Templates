@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Flask Dynamic URLs{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Flask URL Examples</h1>
+            <nav>
+                <ul>
+                    <li><a href="{{ url_for('home') }}">Home</a></li>
+                    <li class="dropdown">
+                        <a href="#">Users</a>
+                        <div class="dropdown-content">
+                            {% for username, data in users.items() %}
+                                <a href="{{ url_for('profile', username=username) }}">{{ data.name }}</a>
+                            {% endfor %}
+                        </div>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#">Posts</a>
+                        <div class="dropdown-content">
+                            {% for id, post in posts.items() %}
+                                <a href="{{ url_for('show_post', post_id=id) }}">{{ post.title }}</a>
+                            {% endfor %}
+                        </div>
+                    </li>
+                    <li><a href="{{ url_for('about') }}">About</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="search-bar">
+        <div class="container">
+            <form action="{{ url_for('search') }}" method="get">
+                <input type="text" name="q" placeholder="Search posts...">
+                <button type="submit">Search</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <main>
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>Flask Dynamic URL Tutorial &copy; {{ current_year() }}</p>
+            <p class="url-explanation">
+                Current URL: {{ request.path }}
+                {% if request.args %}
+                    with query parameters: {{ request.args }}
+                {% endif %}
+            </p>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ post.title }}{% endblock %}
+
+{% block content %}
+    <article class="post-detail">
+        <h2>{{ post.title }}</h2>
+        <div class="post-meta">
+            <p>By <a href="{{ url_for('profile', username=post.author) }}">{{ author.name }}</a> on {{ post.date }}</p>
+        </div>
+        
+        <div class="post-content">
+            <p>{{ post.content }}</p>
+        </div>
+
+        <div class="url-explanation">
+            <h3>URL Breakdown</h3>
+            <p>Current URL: <code>{{ request.path }}</code></p>
+            <p>The <code>post_id</code> parameter is: <code>{{ post_id }}</code> (integer)</p>
+            <p>In Flask, this is captured with the route: <code>@app.route('/post/&lt;int:post_id&gt;')</code></p>
+            <p>The <code>int:</code> prefix ensures that only integers are accepted, and Flask automatically converts the value to an integer.</p>
+        </div>
+    </article>
+{% endblock %}

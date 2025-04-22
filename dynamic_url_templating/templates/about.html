@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}About - Flask URL Examples{% endblock %}
+
+{% block content %}
+    <section class="about">
+        <h2>About Dynamic URLs in Flask</h2>
+        <p>This tutorial demonstrates how Flask handles dynamic URLs and routes with parameters. Flask provides a powerful routing system that allows you to create flexible URL patterns.</p>
+        
+        <h3>Flask Route Converters</h3>
+        <table class="converter-table">
+            <thead>
+                <tr>
+                    <th>Converter</th>
+                    <th>Description</th>
+                    <th>Example</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>string</td>
+                    <td>Default, accepts any text without slashes</td>
+                    <td><code>/user/&lt;username&gt;</code></td>
+                </tr>
+                <tr>
+                    <td>int</td>
+                    <td>Accepts integers</td>
+                    <td><code>/post/&lt;int:post_id&gt;</code></td>
+                </tr>
+                <tr>
+                    <td>float</td>
+                    <td>Accepts floating-point values</td>
+                    <td><code>/product/&lt;float:price&gt;</code></td>
+                </tr>
+                <tr>
+                    <td>path</td>
+                    <td>Like string but also accepts slashes</td>
+                    <td><code>/file/&lt;path:filename&gt;</code></td>
+                </tr>
+                <tr>
+                    <td>uuid</td>
+                    <td>Accepts UUID strings</td>
+                    <td><code>/user/&lt;uuid:id&gt;</code></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>URL Building with url_for()</h3>
+        <p>Flask's <code>url_for()</code> function helps you generate URLs for routes, making your application more maintainable:</p>
+        <div class="code-example">
+            <pre><code># Instead of hardcoding URLs like this:
+&lt;a href="/user/user1"&gt;user1's Profile&lt;/a&gt;
+
+# Use url_for() like this:
+&lt;a href="{{ '{{' }} url_for('profile', username='user1') {{ '}}' }}"&gt;User1's Profile&lt;/a&gt;</code></pre>
+        </div>
+        <p>This ensures that if you change your route patterns, all your links will automatically update.</p>
+    </section>
+{% endblock %}

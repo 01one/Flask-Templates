@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Flask URL Examples{% endblock %}
+
+{% block content %}
+    <section class="intro">
+        <h2>Welcome to the Flask Dynamic URL Tutorial</h2>
+        <p>This example demonstrates how Flask handles dynamic URLs and routes with parameters.</p>
+        <div class="code-example">
+            <pre><code>@app.route('/user/&lt;username&gt;')
+def profile(username):
+    return render_template('profile.html', username=username)</code></pre>
+        </div>
+        <p>Try clicking on the different navigation links to see how Flask processes the dynamic segments of URLs.</p>
+    </section>
+
+    <section class="recent-posts">
+        <h2>Recent Posts</h2>
+        <div class="post-grid">
+            {% for id, post in posts.items() %}
+                <div class="post-card">
+                    <h3>{{ post.title }}</h3>
+                    <p class="post-meta">By <a href="{{ url_for('profile', username=post.author) }}">{{ users[post.author].name }}</a> on {{ post.date }}</p>
+                    <p class="post-excerpt">{{ post.content[:100] }}...</p>
+                    <a href="{{ url_for('show_post', post_id=id) }}" class="btn">Read More</a>
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="url-types">
+        <h2>URL Types in Flask</h2>
+        <div class="card-grid">
+            <div class="card">
+                <h3>String URLs</h3>
+                <code>/user/&lt;username&gt;</code>
+                <p>Example: <a href="{{ url_for('profile', username='user1') }}">{{ url_for('profile', username='user1') }}</a></p>
+                <p>Accepts any text without a slash</p>
+            </div>
+            <div class="card">
+                <h3>Integer URLs</h3>
+                <code>/post/&lt;int:post_id&gt;</code>
+                <p>Example: <a href="{{ url_for('show_post', post_id=1) }}">{{ url_for('show_post', post_id=1) }}</a></p>
+                <p>Only accepts integers</p>
+            </div>
+            <div class="card">
+                <h3>Float URLs</h3>
+                <code>/product/&lt;float:price&gt;</code>
+                <p>Example: /product/19.99</p>
+                <p>Accepts decimal numbers</p>
+            </div>
+            <div class="card">
+                <h3>Path URLs</h3>
+                <code>/files/&lt;path:filepath&gt;</code>
+                <p>Example: /files/images/logo.png</p>
+                <p>Accepts slashes in the variable part</p>
+            </div>
+        </div>
+    </section>
+{% endblock %}
