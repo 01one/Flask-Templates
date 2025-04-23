@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="post">
+        <div class="post-author">
+            <a href="/profile/{{ post.author }}">{{ post.author }}</a>
+        </div>
+        <div class="post-content">{{ post.content }}</div>
+        <div class="post-info">
+            {{ post.timestamp }} • {{ post.likes|length }} likes
+        </div>
+        <div class="post-actions">
+            <form action="/post/{{ post.id }}/like" method="post" style="display: inline;">
+                <button type="submit" class="btn {% if session['username'] in post.likes %}btn-secondary{% endif %}">
+                    {% if session['username'] in post.likes %}Unlike{% else %}Like{% endif %}
+                </button>
+            </form>
+        </div>
+
+        <div class="comment-section">
+            <h3>Comments ({{ post.comments|length }})</h3>
+            
+            <form action="/post/{{ post.id }}/comment" method="post" style="margin-bottom: 1rem;">
+                <div class="form-group">
+                    <textarea name="content" placeholder="Write a comment..." required></textarea>
+                </div>
+                <button type="submit" class="btn">Comment</button>
+            </form>
+
+            {% for comment in post.comments %}
+                <div class="comment">
+                    <strong><a href="/profile/{{ comment.author }}">{{ comment.author }}</a></strong>
+                    <p>{{ comment.content }}</p>
+                    <small>{{ comment.timestamp }}</small>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

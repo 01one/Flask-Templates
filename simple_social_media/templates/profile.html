@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="post">
+        <h2>{{ user.username }}</h2>
+        <p>{{ user.bio }}</p>
+        <p>
+            <span>{{ user.followers|length }} followers</span> • 
+            <span>{{ user.following|length }} following</span>
+        </p>
+        {% if user.username != session['username'] %}
+            <form action="/follow/{{ user.username }}" method="post">
+                <button type="submit" class="btn">
+                    {% if session['username'] in user.followers %}Unfollow{% else %}Follow{% endif %}
+                </button>
+            </form>
+        {% endif %}
+    </div>
+
+    {% for post in posts %}
+        <div class="post">
+            <p>{{ post.content }}</p>
+            <small>{{ post.timestamp }}</small>
+            <div>
+                <form action="/post/{{ post.id }}/like" method="post" style="display: inline;">
+                    <button type="submit" class="btn">
+                        {% if session['username'] in post.likes %}Unlike{% else %}Like{% endif %}
+                        ({{ post.likes|length }})
+                    </button>
+                </form>
+                <span>{{ post.comments|length }} comments</span>
+            </div>
+            <div style="margin-top: 10px;">
+                <form action="/post/{{ post.id }}/comment" method="post">
+                    <input type="text" name="content" placeholder="Write a comment..." required>
+                    <button type="submit" class="btn">Comment</button>
+                </form>
+                {% for comment in post.comments %}
+                    <div style="margin: 5px 0; padding-left: 20px;">
+                        <strong>{{ comment.author }}:</strong> {{ comment.content }}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endfor %}
+{% endblock %}

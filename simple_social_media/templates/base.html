@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Social Media App</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .nav {
+            background: #f0f0f0;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+        .nav a {
+            margin-right: 15px;
+            text-decoration: none;
+            color: #333;
+        }
+        .post {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <a href="/">Home</a>
+        {% if 'username' in session %}
+            <a href="/profile/{{ session['username'] }}">Profile</a>
+            <a href="/logout">Logout ({{ session['username'] }})</a>
+        {% else %}
+            <a href="/login">Login</a>
+        {% endif %}
+    </div>
+    
+    {% if error %}
+        <div style="color: red; margin-bottom: 15px;">{{ error }}</div>
+    {% endif %}
+    
+    {% block content %}{% endblock %}
+</body>
+</html>
