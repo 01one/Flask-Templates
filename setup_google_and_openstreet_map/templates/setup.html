@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map Setup</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        .map-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .mapsetup-title {
+            color: #6a1b9a;
+        }
+
+        .img-preview {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .error-message {
+            color: #dc3545;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container py-5">
+        <h1 class="mb-4 mapsetup-title">Setup Map</h1>
+
+        <a href="{{ url_for('map_page') }}" class="btn btn-primary">Go to Map Page After Setup</a>
+
+        <div id="errorAlert" class="alert alert-danger d-none" role="alert"></div>
+        <div id="successAlert" class="alert alert-success d-none" role="alert">
+            Content updated successfully! Page will reload in 3 seconds...
+        </div>
+        <form id="adminForm">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+
+
+
+
+
+
+
+
+
+            <div class="map-section">
+                <h3>Map</h3>
+                <div class="mb-3">
+                    <label>Map Provider</label>
+                    <select class="form-select" name="map_provider" id="mapProviderSelect">
+                        <option value="google" {% if content.map_data.map_provider=='google' %}selected{% endif %}>Google
+                            Maps</option>
+                        <option value="openstreet" {% if content.map_data.map_provider=='openstreet' %}selected{% endif
+                            %}>OpenStreetMap</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label>Latitude</label>
+                    <input type="text" class="form-control" name="map_lat" id="mapLat"
+                        value="{{ content.map_data.map_lat|default('') }}" placeholder="Latitude">
+                </div>
+                <div class="mb-3">
+                    <label>Longitude</label>
+                    <input type="text" class="form-control" name="map_lng" id="mapLng"
+                        value="{{ content.map_data.map_lng|default('') }}" placeholder="Longitude">
+                </div>
+                <div class="mb-3" id="googleApiKeyGroup"
+                    style="display: {% if content.map_data.map_provider == 'google' %}block{% else %}none{% endif %};">
+                    <label>Google Maps API Key (optional, for admin map picker)</label>
+                    <input type="text" class="form-control" name="google_maps_api_key" id="googleMapsApiKey"
+                        value="{{ content.map_data.google_maps_api_key|default('') }}"
+                        placeholder="Enter Google Maps API Key">
+                </div>
+                <div class="mb-3">
+                    <label>Pick Location on Map</label>
+                    <div id="adminMapPicker" style="height: 250px; border-radius: 10px; overflow: hidden;"></div>
+                </div>
+            </div>
+
+
+            <button type="submit" class="btn btn-primary" id="submitBtn">
+                <span id="submitText">Save Changes</span>
+                <span id="submitSpinner" class="spinner-border spinner-border-sm d-none" role="status"
+                    aria-hidden="true"></span>
+            </button>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+
+
+
+
+
+
+
+        document.getElementById('adminForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            document.getElementById('errorAlert').classList.add('d-none');
+            document.getElementById('successAlert').classList.add('d-none');
+
+
+            const form = e.target;
+            if (!form.checkValidity()) {
+                form.classList.add('was-validated');
+                return;
+            }
+
+
+            const submitBtn = document.getElementById('submitBtn');
+            const submitText = document.getElementById('submitText');
+            const submitSpinner = document.getElementById('submitSpinner');
+            submitBtn.disabled = true;
+            submitText.textContent = 'Saving...';
+            submitSpinner.classList.remove('d-none');
+
+            try {
+ 
+                const data = {
+
+                    map_data: {
+                        map_provider: form.map_provider.value,
+                        map_lat: form.map_lat.value,
+                        map_lng: form.map_lng.value,
+                        google_maps_api_key: form.google_maps_api_key ? form.google_maps_api_key.value : ''
+                    }
+                };
+
+
+
+                const res = await fetch('/api/update', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('input[name="csrf_token"]')?.value
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const responseData = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(responseData.error || 'Failed to update content');
+                }
+
+                document.getElementById('successAlert').classList.remove('d-none');
+
+                setTimeout(() => {
+                    location.reload();
+                }, 3000);
+
+            } catch (error) {
+                console.error('Error:', error);
+
+
+                const errorAlert = document.getElementById('errorAlert');
+                errorAlert.textContent = error.message;
+                errorAlert.classList.remove('d-none');
+
+
+                errorAlert.scrollIntoView({ behavior: 'smooth' });
+
+            } finally {
+                submitBtn.disabled = false;
+                submitText.textContent = 'Save Changes';
+                submitSpinner.classList.add('d-none');
+            }
+        });
+
+
+
+
+
+
+        function initMapPicker() {
+            const provider = document.getElementById('mapProviderSelect').value;
+            const latInput = document.getElementById('mapLat');
+            const lngInput = document.getElementById('mapLng');
+            const apiKey = document.getElementById('googleMapsApiKey')?.value.trim() || '';
+            let lat = parseFloat(latInput.value) || 40.7128;
+            let lng = parseFloat(lngInput.value) || -74.0060;
+
+            if (window.adminMap) {
+                window.adminMap = null;
+            }
+
+            if (provider === 'google' && apiKey) {
+                if (!window.google || !window.google.maps) {
+                    const script = document.createElement('script');
+                    script.src = 'https://maps.googleapis.com/maps/api/js?key=' + encodeURIComponent(apiKey) + '&loading=async&callback=initMapPicker';
+                    script.async = true;
+                    document.body.appendChild(script);
+                    return;
+                }
+
+                window.adminMap = new google.maps.Map(document.getElementById('adminMapPicker'), {
+                    center: { lat: lat, lng: lng },
+                    zoom: 13
+                });
+
+                let marker = new google.maps.Marker({
+                    position: { lat: lat, lng: lng },
+                    map: window.adminMap,
+                    draggable: true
+                });
+
+                marker.addListener('dragend', function (e) {
+                    latInput.value = e.latLng.lat().toFixed(6);
+                    lngInput.value = e.latLng.lng().toFixed(6);
+                });
+
+                window.adminMap.addListener('click', function (e) {
+                    marker.setPosition(e.latLng);
+                    latInput.value = e.latLng.lat().toFixed(6);
+                    lngInput.value = e.latLng.lng().toFixed(6);
+                });
+
+            } else {
+                if (window.L === undefined) {
+                    const leafletCSS = document.createElement('link');
+                    leafletCSS.rel = 'stylesheet';
+                    leafletCSS.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+                    document.head.appendChild(leafletCSS);
+
+                    const leafletJS = document.createElement('script');
+                    leafletJS.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+                    leafletJS.onload = initMapPicker;
+                    document.body.appendChild(leafletJS);
+                    return;
+                }
+
+                window.adminMap = L.map('adminMapPicker').setView([lat, lng], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                }).addTo(window.adminMap);
+
+                let marker = L.marker([lat, lng], { draggable: true }).addTo(window.adminMap);
+
+                marker.on('dragend', function (e) {
+                    const pos = marker.getLatLng();
+                    latInput.value = pos.lat.toFixed(6);
+                    lngInput.value = pos.lng.toFixed(6);
+                });
+
+                window.adminMap.on('click', function (e) {
+                    marker.setLatLng(e.latlng);
+                    latInput.value = e.latlng.lat.toFixed(6);
+                    lngInput.value = e.latlng.lng.toFixed(6);
+                });
+            }
+        }
+
+        document.getElementById('mapProviderSelect').addEventListener('change', function () {
+            document.getElementById('googleApiKeyGroup').style.display = this.value === 'google' ? 'block' : 'none';
+            setTimeout(initMapPicker, 100);
+        });
+
+        if (document.getElementById('googleMapsApiKey')) {
+            document.getElementById('googleMapsApiKey').addEventListener('input', function () {
+                setTimeout(initMapPicker, 100);
+            });
+        }
+
+        window.addEventListener('DOMContentLoaded', function () {
+            initMapPicker();
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map View</title>
+    <style>
+
+        iframe {
+            border: 0;
+            width: 400px;
+            height: 400px;
+        }
+
+
+        .map-error {
+            text-align: center;
+            padding: 2rem;
+            background-color: #f8f9fa;
+            border-radius: 0.5rem;
+        }
+    </style>
+</head>
+
+<body>
+<div>
+    {% if content.map_data.map_provider == 'google' %}
+        {% if content.map_data.map_lat and content.map_data.map_lng %}
+            <iframe loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"
+                src="https://www.google.com/maps/embed/v1/place?key={{ content.map_data.google_maps_api_key or 'demo' }}&q={{ content.map_data.map_lat }},{{ content.map_data.map_lng }}&zoom=15&maptype=roadmap">
+            </iframe>
+        {% else %}
+            <iframe loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"
+                src="https://www.google.com/maps/embed/v1/place?key={{ content.map_data.google_maps_api_key or 'demo' }}&q={{ content.map_data.map_location|urlencode }}">
+            </iframe>
+        {% endif %}
+    {% else %}
+        {% if content.map_data.map_lat and content.map_data.map_lng %}
+            <iframe loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"
+                src="https://www.openstreetmap.org/export/embed.html?bbox={{ content.map_data.map_lng|float - 0.01 }},{{ content.map_data.map_lat|float - 0.01 }},{{ content.map_data.map_lng|float + 0.01 }},{{ content.map_data.map_lat|float + 0.01 }}&layer=mapnik&marker={{ content.map_data.map_lat }},{{ content.map_data.map_lng }}">
+            </iframe>
+        {% else %}
+            <div class="map-error">
+                <i class="fa-solid fa-map-marker-alt fa-3x mb-3 text-muted"></i>
+                <h5>Find Us Here</h5>
+                <p>{{ content.map_data.map_location or content.map_data.address }}</p>
+                <a href="https://www.openstreetmap.org/search?query={{ (content.map_data.map_location or content.map_data.address)|urlencode }}"
+                    target="_blank" class="btn btn-outline-primary btn-sm">
+                    View on OpenStreetMap
+                </a>
+            </div>
+        {% endif %}
+    {% endif %}
+</div>
+
+</body>
+</html>
